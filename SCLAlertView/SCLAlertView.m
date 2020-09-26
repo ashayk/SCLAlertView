@@ -13,6 +13,9 @@
 #import "SCLTimerDisplay.h"
 #import "SCLMacros.h"
 
+// Alex
+#import "ScreenUtils.h"
+
 #if defined(__has_feature) && __has_feature(modules)
 @import AVFoundation;
 @import AudioToolbox;
@@ -320,9 +323,25 @@ SCLTimerDisplay *buttonTimer;
     newBackgroundFrame.size = sz;
     self.backgroundView.frame = newBackgroundFrame;
     
+    // Alex
+    float bWidth = CGRectGetWidth(self.backgroundView.frame);
+    float bHeight = CGRectGetHeight(self.backgroundView.frame);
+    BOOL landscape = bWidth > bHeight;
+    float adjustX = 0;
+    float adjustY = 0;
+    if(landscape && [[self class] hasNotch]) {
+        adjustX = 145./2.;
+        adjustY = 20;
+    }
+    
     // Set frames
-    _contentView.frame = CGRectMake(0.0f, 0.0f, _windowWidth, _windowHeight);
-    _circleViewBackground.frame = CGRectMake(_windowWidth / 2 - kCircleHeightBackground / 2, kCircleBackgroundTopPosition, kCircleHeightBackground, kCircleHeightBackground);
+    //_contentView.frame = CGRectMake(0.0f, 0.0f, _windowWidth, _windowHeight);
+    //_circleViewBackground.frame = CGRectMake(_windowWidth / 2 - kCircleHeightBackground / 2, kCircleBackgroundTopPosition, kCircleHeightBackground, kCircleHeightBackground);
+    
+    _contentView.frame = CGRectMake(0.0f - adjustX, 0.0f - adjustY, _windowWidth, _windowHeight);
+    _circleViewBackground.frame = CGRectMake(_windowWidth / 2 - kCircleHeightBackground / 2 - (adjustX), kCircleBackgroundTopPosition - adjustY, kCircleHeightBackground, kCircleHeightBackground);
+    
+    
     _circleViewBackground.layer.cornerRadius = _circleViewBackground.frame.size.height / 2;
     _circleView.layer.cornerRadius = _circleView.frame.size.height / 2;
     _circleIconImageView.frame = CGRectMake(kCircleHeight / 2 - _circleIconHeight / 2, kCircleHeight / 2 - _circleIconHeight / 2, _circleIconHeight, _circleIconHeight);
@@ -368,6 +387,17 @@ SCLTimerDisplay *buttonTimer;
     
     // Adjust corner radius, if a value has been passed
     _contentView.layer.cornerRadius = self.cornerRadius ? self.cornerRadius : 5.0f;
+}
+
++(BOOL)hasNotch {
+    BOOL iPhoneX = NO;
+    if (@available(iOS 11.0, *)) {
+        UIWindow *mainWindow = [[[UIApplication sharedApplication] delegate] window];
+        if (mainWindow.safeAreaInsets.bottom > 0.0 || mainWindow.safeAreaInsets.left > 0.0) {
+            iPhoneX = YES;
+        }
+    }
+    return iPhoneX;
 }
 
 #pragma mark - UIViewController
@@ -909,6 +939,16 @@ SCLTimerDisplay *buttonTimer;
             self.windowHeight -= (_subTitleHeight - ht);
             self.subTitleHeight = ht;
         } else {
+            float bWidth = CGRectGetWidth(self.backgroundView.frame);
+            float bHeight = CGRectGetHeight(self.backgroundView.frame);
+
+            BOOL landscape = bWidth > bHeight;
+             
+            float target = [ScreenUtils constantForIphone4:100 iPhone5:100 iphone6:105 iphone6Plus:105 ipad:ht def:85];
+            if(ht > target && target > 0 && landscape) {
+                ht = target;
+            }
+             
             self.windowHeight += (ht - _subTitleHeight);
             self.subTitleHeight = ht;
         }
