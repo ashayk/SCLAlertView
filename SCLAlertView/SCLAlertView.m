@@ -282,6 +282,18 @@ SCLTimerDisplay *buttonTimer;
     
     CGSize sz = [self mainScreenFrame].size;
     
+    // Alex
+    float bWidth = CGRectGetWidth(self.backgroundView.frame);
+    float bHeight = CGRectGetHeight(self.backgroundView.frame);
+    BOOL landscape = bWidth > bHeight;
+    float adjustX = 0;
+    float adjustY = 0;
+
+    if(landscape) {
+        _windowWidth *= 2;
+    }
+
+    
     // Check for larger top circle icon flag
     if (_useLargerIcon) {
         // Adjust icon
@@ -323,17 +335,6 @@ SCLTimerDisplay *buttonTimer;
     newBackgroundFrame.size = sz;
     self.backgroundView.frame = newBackgroundFrame;
     
-    // Alex
-    float bWidth = CGRectGetWidth(self.backgroundView.frame);
-    float bHeight = CGRectGetHeight(self.backgroundView.frame);
-    BOOL landscape = bWidth > bHeight;
-    float adjustX = 0;
-    float adjustY = 0;
-    if(landscape && [[self class] hasNotch]) {
-        adjustX = 145./2.;
-        adjustY = 20;
-    }
-    
     // Set frames
     //_contentView.frame = CGRectMake(0.0f, 0.0f, _windowWidth, _windowHeight);
     //_circleViewBackground.frame = CGRectMake(_windowWidth / 2 - kCircleHeightBackground / 2, kCircleBackgroundTopPosition, kCircleHeightBackground, kCircleHeightBackground);
@@ -371,7 +372,7 @@ SCLTimerDisplay *buttonTimer;
     // Buttons
     CGFloat x = 12.0f;
     for (SCLButton *btn in _buttons) {
-        btn.frame = CGRectMake(x, y, btn.frame.size.width, btn.frame.size.height);
+        btn.frame = CGRectMake(x, y, /*btn.frame.size.width*/ _windowWidth - (2*x), btn.frame.size.height);
         
         // Add horizontal or vertical offset acording on _horizontalButtons parameter
         if (_horizontalButtons) {
